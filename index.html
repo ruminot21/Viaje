@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f766e">
+  <title>ViajaPro | Sistema de Reservas</title>
+  <style>
+    :root{
+      --primary:#0f766e;
+      --primary-2:#14b8a6;
+      --primary-soft:#ccfbf1;
+      --dark:#0f172a;
+      --muted:#64748b;
+      --bg:#f1f5f9;
+      --card:#ffffff;
+      --border:#e2e8f0;
+      --success:#16a34a;
+      --warning:#d97706;
+      --danger:#dc2626;
+      --info:#2563eb;
+      --shadow:0 12px 35px rgba(15,23,42,.08);
+      --radius:20px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--dark);
+      background:
+        radial-gradient(circle at top right, rgba(20,184,166,.13), transparent 30%),
+        var(--bg);
+    }
+    button,input,select{font:inherit}
+    button{border:0;cursor:pointer}
+    button:focus-visible,input:focus-visible,select:focus-visible{
+      outline:3px solid rgba(20,184,166,.25);
+      outline-offset:2px;
+    }
+
+    .app-shell{min-height:100vh}
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:14px clamp(16px,4vw,42px);
+      color:white;
+      background:rgba(15,118,110,.96);
+      backdrop-filter:blur(14px);
+      box-shadow:0 8px 24px rgba(15,118,110,.18);
+    }
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .brand-mark{
+      width:46px;height:46px;border-radius:15px;
+      display:grid;place-items:center;font-size:24px;
+      background:rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.25);
+      flex:none;
+    }
+    .brand h1{font-size:clamp(18px,3vw,24px);margin:0;line-height:1.1}
+    .brand p{margin:4px 0 0;font-size:12px;opacity:.85}
+    .top-actions{display:flex;align-items:center;gap:8px}
+    .icon-btn{
+      width:44px;height:44px;border-radius:14px;
+      display:grid;place-items:center;
+      color:white;background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.2);
+      font-size:20px;
+    }
+    .icon-btn:hover{background:rgba(255,255,255,.22)}
+
+    main{
+      width:min(1180px,calc(100% - 28px));
+      margin:24px auto 110px;
+    }
+
+    .hero{
+      display:grid;
+      grid-template-columns:1.25fr .75fr;
+      gap:18px;
+      margin-bottom:18px;
+    }
+    .hero-main,.trip-card{
+      border-radius:26px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+    }
+    .hero-main{
+      min-height:225px;
+      padding:clamp(24px,5vw,42px);
+      color:white;
+      background:
+        linear-gradient(120deg,rgba(15,23,42,.93),rgba(15,118,110,.88)),
+        linear-gradient(45deg,#0f172a,#0f766e);
+      position:relative;
+    }
+    .hero-main::after{
+      content:"";
+      position:absolute;right:-55px;bottom:-85px;
+      width:260px;height:260px;border-radius:50%;
+      border:44px solid rgba(255,255,255,.08);
+    }
+    .eyebrow{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:7px 12px;border-radius:999px;
+      font-size:12px;font-weight:800;letter-spacing:.03em;
+      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.16);
+    }
+    .hero-main h2{
+      position:relative;z-index:1;
+      max-width:650px;
+      margin:18px 0 10px;
+      font-size:clamp(28px,5vw,48px);
+      line-height:1.02;
+    }
+    .hero-main p{
+      position:relative;z-index:1;
+      max-width:620px;margin:0;color:#dbeafe;
+      font-size:clamp(14px,2vw,17px);
+    }
+    .trip-card{
+      padding:24px;
+      background:linear-gradient(160deg,#fff,#ecfeff);
+      border:1px solid rgba(20,184,166,.18);
+    }
+    .trip-card h3{margin:0 0 18px;font-size:16px}
+    .trip-row{
+      display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+      padding:13px 0;border-bottom:1px solid var(--border);
+    }
+    .trip-row:last-child{border-bottom:0}
+    .trip-row span{color:var(--muted);font-size:13px}
+    .trip-row strong{text-align:right;word-break:break-word}
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:14px;
+      margin-bottom:18px;
+    }
+    .stat{
+      display:flex;align-items:center;gap:14px;
+      padding:18px;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:18px;
+      box-shadow:0 8px 24px rgba(15,23,42,.05);
+    }
+    .stat-icon{
+      width:46px;height:46px;border-radius:15px;
+      display:grid;place-items:center;font-size:22px;
+      background:var(--primary-soft);
+      flex:none;
+    }
+    .stat span{display:block;font-size:12px;color:var(--muted);font-weight:700}
+    .stat strong{display:block;margin-top:4px;font-size:clamp(18px,3vw,24px)}
+
+    .tabs-wrap{
+      position:sticky;
+      top:78px;
+      z-index:40;
+      margin-bottom:18px;
+      padding:6px;
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:6px;
+      border-radius:18px;
+      background:rgba(255,255,255,.92);
+      border:1px solid var(--border);
+      box-shadow:0 9px 25px rgba(15,23,42,.07);
+      backdrop-filter:blur(10px);
+    }
+    .tab{
+      padding:13px 14px;
+      border-radius:13px;
+      color:var(--muted);
+      background:transparent;
+      font-weight:800;
+      transition:.2s ease;
+    }
+    .tab:hover{background:#f8fafc;color:var(--dark)}
+    .tab.active{
+      color:white;
+      background:linear-gradient(135deg,var(--primary),var(--primary-2));
+      box-shadow:0 8px 18px rgba(15,118,110,.25);
+    }
+
+    .panel{
+      display:none;
+      padding:clamp(18px,4vw,30px);
+      border-radius:var(--radius);
+      background:var(--card);
+      border:1px solid var(--border);
+      box-shadow:var(--shadow);
+    }
+    .panel.active{display:block;animation:fade .22s ease}
+    @keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+    .section-head{
+      display:flex;align-items:flex-start;justify-content:space-between;
+      gap:16px;margin-bottom:24px;
+    }
+    .section-head h2{margin:0;font-size:clamp(20px,3vw,28px)}
+    .section-head p{margin:6px 0 0;color:var(--muted);font-size:14px}
+    .badge{
+      padding:7px 11px;border-radius:999px;
+      background:var(--primary-soft);color:var(--primary);
+      font-size:12px;font-weight:800;white-space:nowrap;
+    }
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:18px;
+    }
+    .field.full{grid-column:1/-1}
+    .field label{
+      display:block;margin-bottom:8px;
+      font-size:13px;font-weight:800;color:#334155;
+    }
+    .field input,.field select{
+      width:100%;min-height:48px;
+      padding:12px 14px;
+      border:1px solid var(--border);
+      border-radius:13px;
+      color:var(--dark);
+      background:#fff;
+      transition:.2s ease;
+    }
+    .field input:hover,.field select:hover{border-color:#94a3b8}
+    .field input:focus,.field select:focus{
+      border-color:var(--primary-2);
+      box-shadow:0 0 0 4px rgba(20,184,166,.1);
+    }
+    .readonly{background:#f8fafc!important;color:#475569!important}
+    .hint{display:block;margin-top:6px;font-size:11px;color:var(--muted)}
+    .form-actions{
+      grid-column:1/-1;
+      display:flex;flex-wrap:wrap;gap:10px;
+      margin-top:6px;
+    }
+
+    .btn{
+      min-height:44px;
+      padding:11px 16px;
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      border-radius:12px;
+      font-weight:800;
+      transition:.18s ease;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn-primary{color:white;background:linear-gradient(135deg,var(--primary),var(--primary-2))}
+    .btn-secondary{color:#334155;background:#f1f5f9;border:1px solid var(--border)}
+    .btn-danger{color:#b91c1c;background:#fee2e2}
+    .btn-info{color:white;background:var(--info)}
+    .btn-success{color:white;background:var(--success)}
+    .btn-warning{color:white;background:var(--warning)}
+    .btn-sm{min-height:36px;padding:8px 11px;font-size:12px}
+
+    .toolbar{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:12px;flex-wrap:wrap;margin-bottom:18px;
+    }
+    .search{
+      position:relative;flex:1;min-width:220px;max-width:520px;
+    }
+    .search span{position:absolute;left:14px;top:50%;transform:translateY(-50%)}
+    .search input{
+      width:100%;min-height:46px;padding:11px 14px 11px 42px;
+      border:1px solid var(--border);border-radius:13px;
+    }
+    .toolbar-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+    .reservas-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:16px;
+    }
+    .reserva-card{
+      padding:18px;
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:linear-gradient(160deg,#fff,#f8fafc);
+      transition:.2s ease;
+    }
+    .reserva-card:hover{
+      transform:translateY(-2px);
+      box-shadow:0 12px 28px rgba(15,23,42,.08);
+    }
+    .reserva-top{
+      display:flex;align-items:flex-start;justify-content:space-between;
+      gap:12px;margin-bottom:15px;
+    }
+    .avatar{
+      width:46px;height:46px;border-radius:15px;display:grid;place-items:center;
+      color:white;font-weight:900;background:linear-gradient(135deg,var(--primary),var(--primary-2));
+      flex:none;
+    }
+    .person{display:flex;gap:12px;min-width:0}
+    .person h3{margin:2px 0 4px;font-size:17px;overflow:hidden;text-overflow:ellipsis}
+    .person p{margin:0;color:var(--muted);font-size:12px}
+    .status{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:6px 10px;border-radius:999px;font-size:11px;font-weight:900;text-transform:uppercase;
+      white-space:nowrap;
+    }
+    .status.pagado{color:#166534;background:#dcfce7}
+    .status.reservado{color:#92400e;background:#fef3c7}
+    .details{
+      display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;margin-bottom:15px;
+    }
+    .detail{
+      padding:10px;border-radius:12px;background:#f8fafc;
+      border:1px solid #eef2f7;
+    }
+    .detail span{display:block;font-size:10px;color:var(--muted);font-weight:800;text-transform:uppercase}
+    .detail strong{display:block;margin-top:4px;font-size:13px;word-break:break-word}
+    .card-actions{display:flex;gap:7px;flex-wrap:wrap}
+
+    .empty{
+      grid-column:1/-1;
+      padding:55px 20px;text-align:center;
+      border:2px dashed var(--border);border-radius:18px;
+      color:var(--muted);
+    }
+    .empty .emoji{font-size:45px;margin-bottom:10px}
+    .empty h3{margin:0;color:var(--dark)}
+    .empty p{margin:7px 0 0}
+
+    .table-wrap{overflow:auto;border:1px solid var(--border);border-radius:16px}
+    table{width:100%;border-collapse:collapse;min-width:850px}
+    th,td{padding:13px 14px;text-align:left;border-bottom:1px solid var(--border)}
+    th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#475569;background:#f8fafc}
+    td{font-size:13px}
+    tbody tr:hover{background:#f8fafc}
+    td select{padding:8px;border-radius:9px;border:1px solid var(--border);background:white}
+    .money{font-weight:900;color:var(--primary)}
+
+    .modal{
+      display:none;position:fixed;inset:0;z-index:100;
+      align-items:center;justify-content:center;
+      padding:18px;background:rgba(15,23,42,.62);
+      backdrop-filter:blur(5px);
+    }
+    .modal.open{display:flex}
+    .modal-card{
+      width:min(620px,100%);max-height:92vh;overflow:auto;
+      padding:24px;border-radius:22px;background:white;
+      box-shadow:0 25px 80px rgba(15,23,42,.35);
+      animation:modalIn .22s ease;
+    }
+    @keyframes modalIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
+    .modal-head{
+      display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px
+    }
+    .modal-head h2{margin:0}
+    .close-btn{
+      width:40px;height:40px;border-radius:12px;font-size:24px;
+      background:#f1f5f9;color:#475569;
+    }
+
+    .settings-menu{
+      position:fixed;right:18px;bottom:86px;z-index:70;
+      width:min(300px,calc(100% - 36px));
+      padding:10px;display:none;
+      border-radius:18px;background:white;border:1px solid var(--border);
+      box-shadow:0 20px 55px rgba(15,23,42,.2);
+    }
+    .settings-menu.open{display:block;animation:fade .2s ease}
+    .settings-menu button{
+      width:100%;padding:13px;border-radius:11px;text-align:left;
+      background:white;color:#334155;font-weight:750;
+    }
+    .settings-menu button:hover{background:#f1f5f9}
+    .fab{
+      position:fixed;right:20px;bottom:20px;z-index:70;
+      width:58px;height:58px;border-radius:18px;
+      display:grid;place-items:center;font-size:24px;color:white;
+      background:linear-gradient(135deg,var(--primary),var(--primary-2));
+      box-shadow:0 14px 35px rgba(15,118,110,.34);
+    }
+
+    .toast-wrap{
+      position:fixed;top:86px;right:18px;z-index:150;
+      display:grid;gap:8px;width:min(360px,calc(100% - 36px));
+    }
+    .toast{
+      padding:13px 15px;border-radius:13px;color:white;
+      background:#0f172a;box-shadow:0 12px 35px rgba(15,23,42,.22);
+      animation:toastIn .2s ease;
+    }
+    @keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+
+    @media (max-width:900px){
+      .hero{grid-template-columns:1fr}
+      .stats{grid-template-columns:repeat(2,1fr)}
+      .reservas-grid{grid-template-columns:1fr}
+    }
+    @media (max-width:640px){
+      main{width:min(100% - 20px,1180px);margin-top:12px}
+      .topbar{padding:11px 12px}
+      .brand-mark{width:40px;height:40px;border-radius:12px}
+      .brand p{display:none}
+      .hero-main,.trip-card{border-radius:20px}
+      .hero-main{min-height:190px;padding:25px 20px}
+      .stats{gap:9px}
+      .stat{padding:13px 11px;gap:9px;border-radius:15px}
+      .stat-icon{width:38px;height:38px;border-radius:12px;font-size:18px}
+      .tabs-wrap{top:68px;overflow:auto;grid-template-columns:repeat(3,minmax(125px,1fr))}
+      .tab{padding:11px 8px;font-size:12px}
+      .panel{padding:17px;border-radius:17px}
+      .section-head{flex-direction:column;margin-bottom:18px}
+      .form-grid{grid-template-columns:1fr;gap:14px}
+      .field.full,.form-actions{grid-column:auto}
+      .form-actions .btn{flex:1 1 100%}
+      .toolbar-actions{width:100%}
+      .toolbar-actions .btn{flex:1}
+      .details{grid-template-columns:1fr}
+      .reserva-top{align-items:center}
+      .card-actions .btn{flex:1}
+      .modal-card{padding:18px;border-radius:18px}
+    }
+    @media print{
+      .topbar,.hero,.stats,.tabs-wrap,.toolbar,.fab,.settings-menu,.card-actions{display:none!important}
+      body{background:white}
+      main{width:100%;margin:0}
+      .panel{display:block!important;border:0;box-shadow:none;padding:0}
+      #tabAgregar,#tabReservas{display:none!important}
+      .table-wrap{border:0}
+      table{min-width:0}
+    }
+  </style>
+</head>
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyAiKZLFONFEl2i4ZAsYRzVZxl0cCUIZnAA",
+    authDomain: "viajapro-aca36.firebaseapp.com",
+    projectId: "viajapro-aca36",
+    storageBucket: "viajapro-aca36.firebasestorage.app",
+    messagingSenderId: "223936852972",
+    appId: "1:223936852972:web:f02f521102106a6816c6c9"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+</script>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">🚌</div>
+      <div>
+        <h1>ViajaPro</h1>
+        <p>Reservas y control de pasajeros</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="icon-btn" type="button" onclick="cambiarTab('tabAgregar')" title="Nueva reserva">＋</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-main">
+        <span class="eyebrow">✨ Gestión simple y rápida</span>
+        <h2>Controla tus viajes desde cualquier pantalla.</h2>
+        <p>Agrega pasajeros, revisa pagos, exporta listas y comparte tickets por WhatsApp desde celular, tablet o computador.</p>
+      </div>
+      <aside class="trip-card">
+        <h3>Información del viaje</h3>
+        <div class="trip-row"><span>Destino</span><strong id="heroDestino">Destino por definir</strong></div>
+        <div class="trip-row"><span>Precio por persona</span><strong id="heroPrecio">$0</strong></div>
+        <div class="trip-row"><span>Próxima salida</span><strong id="heroFecha">Sin fecha</strong></div>
+      </aside>
+    </section>
+
+    <section class="stats">
+      <article class="stat"><div class="stat-icon">👥</div><div><span>Pasajeros</span><strong id="statPersonas">0</strong></div></article>
+      <article class="stat"><div class="stat-icon">✅</div><div><span>Reservas pagadas</span><strong id="statPagadas">0</strong></div></article>
+      <article class="stat"><div class="stat-icon">🕒</div><div><span>Pendientes</span><strong id="statPendientes">0</strong></div></article>
+      <article class="stat"><div class="stat-icon">💰</div><div><span>Total pagado</span><strong id="statMonto">$0</strong></div></article>
+    </section>
+
+    <nav class="tabs-wrap" aria-label="Secciones">
+      <button class="tab active" data-target="tabAgregar">➕ Nueva reserva</button>
+      <button class="tab" data-target="tabReservas">🎫 Reservas</button>
+      <button class="tab" data-target="tabLista">📋 Lista general</button>
+    </nav>
+
+    <section class="panel active" id="tabAgregar">
+      <div class="section-head">
+        <div><h2>Agregar una reserva</h2><p>Completa los datos del pasajero principal.</p></div>
+        <span class="badge">Datos guardados localmente</span>
+      </div>
+
+      <form id="reservaForm" class="form-grid">
+        <div class="field">
+          <label for="nombre">Nombre completo *</label>
+          <input id="nombre" type="text" autocomplete="name" placeholder="Ej: María González" required maxlength="80">
+        </div>
+        <div class="field">
+          <label for="telefono">Teléfono *</label>
+          <input id="telefono" type="tel" inputmode="tel" autocomplete="tel" placeholder="Ej: 56912345678" required maxlength="20">
+          <small class="hint">Incluye el código de país para WhatsApp.</small>
+        </div>
+        <div class="field">
+          <label for="rut">RUT *</label>
+          <input id="rut" type="text" placeholder="Ej: 12.345.678-9" required maxlength="14">
+        </div>
+        <div class="field">
+          <label for="estado">Estado de pago</label>
+          <select id="estado">
+            <option value="reservado">Reservado / pendiente</option>
+            <option value="pagado">Pagado</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="precio">Precio por persona</label>
+          <input id="precio" class="readonly" type="text" readonly>
+        </div>
+        <div class="field">
+          <label for="destino">Destino</label>
+          <input id="destino" class="readonly" type="text" readonly>
+        </div>
+        <div class="field">
+          <label for="fecha">Fecha del viaje *</label>
+          <input id="fecha" type="date" required>
+        </div>
+        <div class="field">
+          <label for="numPersonas">Cantidad de personas *</label>
+          <input id="numPersonas" type="number" min="1" max="100" value="1" required>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit">💾 Guardar reserva</button>
+          <button class="btn btn-secondary" type="reset">↺ Limpiar formulario</button>
+          <button class="btn btn-danger" type="button" onclick="eliminarTodasReservas()">🗑️ Eliminar todas</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel" id="tabReservas">
+      <div class="section-head">
+        <div><h2>Reservas registradas</h2><p>Administra, edita o comparte cada reserva.</p></div>
+        <span class="badge" id="contadorReservas">0 reservas</span>
+      </div>
+      <div class="toolbar">
+        <div class="search"><span>🔎</span><input id="buscarCards" type="search" placeholder="Buscar por nombre, RUT o teléfono..."></div>
+        <div class="toolbar-actions">
+          <button class="btn btn-secondary" type="button" onclick="imprimirReservas()">🖨️ Imprimir</button>
+        </div>
+      </div>
+      <div class="reservas-grid" id="reservasList"></div>
+    </section>
+
+    <section class="panel" id="tabLista">
+      <div class="section-head">
+        <div><h2>Lista general</h2><p>Vista ordenada para control y exportación.</p></div>
+        <span class="badge">Orden alfabético</span>
+      </div>
+      <div class="toolbar">
+        <div class="search"><span>🔎</span><input id="buscarTabla" type="search" placeholder="Filtrar pasajeros..."></div>
+        <div class="toolbar-actions">
+          <button class="btn btn-success" type="button" onclick="descargarLista()">⬇️ CSV</button>
+          <button class="btn btn-info" type="button" onclick="descargarPdf()">📄 PDF</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table id="reservasTable">
+          <thead><tr>
+            <th>N°</th><th>Nombre</th><th>Teléfono</th><th>RUT</th><th>Personas</th><th>Fecha</th><th>Estado</th><th>Subtotal</th><th>Acción</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <button class="fab" type="button" onclick="toggleSettings()" title="Configuración">⚙️</button>
+  <div class="settings-menu" id="settingsMenu">
+    <button type="button" onclick="editarPrecio()">💵 Editar precio por persona</button>
+    <button type="button" onclick="editarDestino()">📍 Editar destino</button>
+    <button type="button" onclick="editarFechaViaje()">📅 Definir fecha del viaje</button>
+    <button type="button" onclick="cambiarContrasena()">🔐 Cambiar contraseña</button>
+    <button type="button" onclick="restaurarSistema()">♻️ Restaurar sistema</button>
+  </div>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2 id="modalTitle">Editar reserva</h2>
+      <button class="close-btn" type="button" onclick="cerrarModal()" aria-label="Cerrar">×</button>
+    </div>
+    <form id="editForm" class="form-grid">
+      <div class="field"><label for="editNombre">Nombre</label><input id="editNombre" required maxlength="80"></div>
+      <div class="field"><label for="editTelefono">Teléfono</label><input id="editTelefono" type="tel" required maxlength="20"></div>
+      <div class="field"><label for="editRut">RUT</label><input id="editRut" required maxlength="14"></div>
+      <div class="field"><label for="editEstado">Estado</label><select id="editEstado"><option value="reservado">Reservado</option><option value="pagado">Pagado</option></select></div>
+      <div class="field"><label for="editFecha">Fecha</label><input id="editFecha" type="date" required></div>
+      <div class="field"><label for="editNumPersonas">Personas</label><input id="editNumPersonas" type="number" min="1" max="100" required></div>
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit">💾 Guardar cambios</button>
+        <button class="btn btn-secondary" type="button" onclick="cerrarModal()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+<script>
+(() => {
+  const STORAGE = {
+    reservas: "viajapro_reservas",
+    precio: "viajapro_precio",
+    destino: "viajapro_destino",
+    password: "viajapro_password",
+    fecha: "viajapro_fecha"
+  };
+
+  let reservas = cargarReservas();
+  let precioPorPersona = Number(localStorage.getItem(STORAGE.precio) || localStorage.getItem("precioPorPersona") || 10000);
+  let destinoFijo = localStorage.getItem(STORAGE.destino) || localStorage.getItem("destinoFijo") || "Destino por definir";
+  let contrasena = localStorage.getItem(STORAGE.password) || localStorage.getItem("contrasena") || "12345";
+  let fechaViaje = localStorage.getItem(STORAGE.fecha) || "";
+  let reservaIdEditando = null;
+
+  function cargarReservas(){
+    let data = [];
+    try{
+      data = JSON.parse(localStorage.getItem(STORAGE.reservas) || localStorage.getItem("reservas") || "[]");
+    }catch(e){ data = []; }
+    return Array.isArray(data) ? data.map((r,i) => ({
+      id: r.id || (crypto.randomUUID ? crypto.randomUUID() : "r-" + Date.now() + "-" + i),
+      nombre: String(r.nombre || "").trim(),
+      telefono: String(r.telefono || "").trim(),
+      rut: String(r.rut || "").trim(),
+      estado: r.estado === "pagado" ? "pagado" : "reservado",
+      precio: Number(r.precio || precioPorPersona || 0),
+      destino: String(r.destino || destinoFijo || ""),
+      fecha: r.fecha || "",
+      numPersonas: Math.max(1, Number(r.numPersonas || 1))
+    })) : [];
+  }
+
+  const $ = id => document.getElementById(id);
+  const formatoCLP = valor => new Intl.NumberFormat("es-CL",{style:"currency",currency:"CLP",maximumFractionDigits:0}).format(Number(valor)||0);
+  const escapeHTML = texto => String(texto ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));
+  const fechaBonita = fecha => {
+    if(!fecha) return "Sin fecha";
+    const [y,m,d] = fecha.split("-").map(Number);
+    return new Intl.DateTimeFormat("es-CL",{day:"2-digit",month:"2-digit",year:"numeric"}).format(new Date(y,m-1,d));
+  };
+  const iniciales = nombre => nombre.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join("").toUpperCase() || "P";
+
+  function guardar(){
+    localStorage.setItem(STORAGE.reservas, JSON.stringify(reservas));
+  }
+
+  function toast(mensaje){
+    const div = document.createElement("div");
+    div.className = "toast";
+    div.textContent = mensaje;
+    $("toastWrap").appendChild(div);
+    setTimeout(() => div.remove(), 2800);
+  }
+
+  function refrescarConfiguracion(){
+    $("precio").value = formatoCLP(precioPorPersona);
+    $("destino").value = destinoFijo;
+    $("heroPrecio").textContent = formatoCLP(precioPorPersona);
+    $("heroDestino").textContent = destinoFijo;
+    $("heroFecha").textContent = fechaBonita(fechaViaje);
+    if(fechaViaje && !$("fecha").value) $("fecha").value = fechaViaje;
+  }
+
+  function actualizar(){
+    guardar();
+    refrescarConfiguracion();
+
+    const totalPersonas = reservas.reduce((s,r)=>s+r.numPersonas,0);
+    const pagadas = reservas.filter(r=>r.estado==="pagado");
+    const pendientes = reservas.filter(r=>r.estado!=="pagado");
+    const monto = pagadas.reduce((s,r)=>s+(r.precio*r.numPersonas),0);
+
+    $("statPersonas").textContent = totalPersonas;
+    $("statPagadas").textContent = pagadas.length;
+    $("statPendientes").textContent = pendientes.length;
+    $("statMonto").textContent = formatoCLP(monto);
+    $("contadorReservas").textContent = `${reservas.length} ${reservas.length===1?"reserva":"reservas"}`;
+
+    renderCards($("buscarCards").value);
+    renderTabla($("buscarTabla").value);
+  }
+
+  function filtrar(texto){
+    const q = String(texto||"").toLowerCase().trim();
+    return [...reservas].filter(r =>
+      [r.nombre,r.telefono,r.rut,r.destino,r.estado].some(v=>String(v).toLowerCase().includes(q))
+    );
+  }
+
+  function renderCards(busqueda=""){
+    const lista = $("reservasList");
+    const datos = filtrar(busqueda).sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
+    if(!datos.length){
+      lista.innerHTML = `<div class="empty"><div class="emoji">🧳</div><h3>No hay reservas para mostrar</h3><p>Agrega una nueva reserva o cambia la búsqueda.</p></div>`;
+      return;
+    }
+    lista.innerHTML = datos.map(r => {
+      const subtotal = r.precio*r.numPersonas;
+      return `<article class="reserva-card">
+        <div class="reserva-top">
+          <div class="person">
+            <div class="avatar">${escapeHTML(iniciales(r.nombre))}</div>
+            <div><h3>${escapeHTML(r.nombre)}</h3><p>${escapeHTML(r.rut)} · ${escapeHTML(r.telefono)}</p></div>
+          </div>
+          <span class="status ${r.estado}">${r.estado==="pagado"?"● Pagado":"● Reservado"}</span>
+        </div>
+        <div class="details">
+          <div class="detail"><span>Destino</span><strong>${escapeHTML(r.destino)}</strong></div>
+          <div class="detail"><span>Fecha</span><strong>${fechaBonita(r.fecha)}</strong></div>
+          <div class="detail"><span>Personas</span><strong>${r.numPersonas}</strong></div>
+          <div class="detail"><span>Subtotal</span><strong class="money">${formatoCLP(subtotal)}</strong></div>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-sm btn-secondary" onclick="app.verTicket('${r.id}')">🎫 Ticket</button>
+          <button class="btn btn-sm btn-info" onclick="app.editarReserva('${r.id}')">✏️ Editar</button>
+          <button class="btn btn-sm btn-success" onclick="app.enviarWhatsApp('${r.id}')">WhatsApp</button>
+          <button class="btn btn-sm btn-danger" onclick="app.eliminarReserva('${r.id}')">🗑️</button>
+        </div>
+      </article>`;
+    }).join("");
+  }
+
+  function renderTabla(busqueda=""){
+    const tbody = $("reservasTable").querySelector("tbody");
+    const datos = filtrar(busqueda).sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
+    if(!datos.length){
+      tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:30px;color:#64748b">No hay resultados.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = datos.map((r,i)=>`<tr>
+      <td>${i+1}</td>
+      <td><strong>${escapeHTML(r.nombre)}</strong></td>
+      <td>${escapeHTML(r.telefono)}</td>
+      <td>${escapeHTML(r.rut)}</td>
+      <td>${r.numPersonas}</td>
+      <td>${fechaBonita(r.fecha)}</td>
+      <td><select onchange="app.cambiarEstado('${r.id}',this.value)">
+        <option value="reservado" ${r.estado==="reservado"?"selected":""}>Reservado</option>
+        <option value="pagado" ${r.estado==="pagado"?"selected":""}>Pagado</option>
+      </select></td>
+      <td class="money">${formatoCLP(r.precio*r.numPersonas)}</td>
+      <td><button class="btn btn-sm btn-secondary" onclick="app.editarReserva('${r.id}')">Editar</button></td>
+    </tr>`).join("");
+  }
+
+  function cambiarTab(id){
+    document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.target===id));
+    document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("active",p.id===id));
+    window.scrollTo({top:document.querySelector(".tabs-wrap").offsetTop-85,behavior:"smooth"});
+  }
+
+  document.querySelectorAll(".tab").forEach(tab=>tab.addEventListener("click",()=>cambiarTab(tab.dataset.target)));
+  $("buscarCards").addEventListener("input",e=>renderCards(e.target.value));
+  $("buscarTabla").addEventListener("input",e=>renderTabla(e.target.value));
+
+  $("reservaForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const nombre = $("nombre").value.trim();
+    const telefono = $("telefono").value.replace(/[^\d+]/g,"").trim();
+    const rut = $("rut").value.trim();
+    const fecha = $("fecha").value;
+    const numPersonas = Number($("numPersonas").value);
+
+    if(!nombre || !telefono || !rut || !fecha || numPersonas<1){
+      toast("Completa todos los campos obligatorios.");
+      return;
+    }
+
+    reservas.push({
+      id: crypto.randomUUID ? crypto.randomUUID() : "r-"+Date.now(),
+      nombre,telefono,rut,
+      estado:$("estado").value,
+      precio:precioPorPersona,
+      destino:destinoFijo,
+      fecha,
+      numPersonas
+    });
+    e.target.reset();
+    $("numPersonas").value = 1;
+    $("estado").value = "reservado";
+    if(fechaViaje) $("fecha").value = fechaViaje;
+    actualizar();
+    toast("Reserva guardada correctamente.");
+    cambiarTab("tabReservas");
+  });
+
+  $("editForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const r = reservas.find(x=>x.id===reservaIdEditando);
+    if(!r) return;
+    r.nombre = $("editNombre").value.trim();
+    r.telefono = $("editTelefono").value.replace(/[^\d+]/g,"").trim();
+    r.rut = $("editRut").value.trim();
+    r.estado = $("editEstado").value;
+    r.fecha = $("editFecha").value;
+    r.numPersonas = Math.max(1,Number($("editNumPersonas").value)||1);
+    actualizar();
+    cerrarModal();
+    toast("Reserva actualizada.");
+  });
+
+  function editarReserva(id){
+    const r = reservas.find(x=>x.id===id);
+    if(!r) return;
+    reservaIdEditando=id;
+    $("editNombre").value=r.nombre;
+    $("editTelefono").value=r.telefono;
+    $("editRut").value=r.rut;
+    $("editEstado").value=r.estado;
+    $("editFecha").value=r.fecha;
+    $("editNumPersonas").value=r.numPersonas;
+    $("modal").classList.add("open");
+  }
+
+  function cerrarModal(){
+    $("modal").classList.remove("open");
+    reservaIdEditando=null;
+  }
+
+  function eliminarReserva(id){
+    const r=reservas.find(x=>x.id===id);
+    if(r && confirm(`¿Eliminar la reserva de ${r.nombre}?`)){
+      reservas=reservas.filter(x=>x.id!==id);
+      actualizar();
+      toast("Reserva eliminada.");
+    }
+  }
+
+  function eliminarTodasReservas(){
+    if(!reservas.length){ toast("No hay reservas para eliminar."); return; }
+    if(!validarPassword()) return;
+    if(confirm("Esta acción eliminará todas las reservas. ¿Deseas continuar?")){
+      reservas=[];
+      actualizar();
+      toast("Todas las reservas fueron eliminadas.");
+    }
+  }
+
+  function cambiarEstado(id,estado){
+    const r=reservas.find(x=>x.id===id);
+    if(r){r.estado=estado;actualizar();toast("Estado de pago actualizado.");}
+  }
+
+  function ticketTexto(r){
+    return [
+      "TICKET DE RESERVA - VIAJAPRO",
+      `Nombre: ${r.nombre}`,
+      `Teléfono: ${r.telefono}`,
+      `RUT: ${r.rut}`,
+      `Estado: ${r.estado==="pagado"?"Pagado":"Reservado"}`,
+      `Destino: ${r.destino}`,
+      `Fecha: ${fechaBonita(r.fecha)}`,
+      `Personas: ${r.numPersonas}`,
+      `Precio por persona: ${formatoCLP(r.precio)}`,
+      `Total: ${formatoCLP(r.precio*r.numPersonas)}`
+    ].join("\n");
+  }
+
+  function verTicket(id){
+    const r=reservas.find(x=>x.id===id);
+    if(r) alert(ticketTexto(r));
+  }
+
+  function enviarWhatsApp(id){
+    const r=reservas.find(x=>x.id===id);
+    if(!r) return;
+    const telefono=r.telefono.replace(/\D/g,"");
+    window.open(`https://wa.me/${telefono}?text=${encodeURIComponent(ticketTexto(r))}`,"_blank","noopener");
+  }
+
+  function validarPassword(){
+    const pass=prompt("Ingresa la contraseña de administrador:");
+    if(pass!==contrasena){toast("Contraseña incorrecta.");return false}
+    return true;
+  }
+
+  function editarPrecio(){
+    if(!validarPassword()) return;
+    const valor=prompt("Nuevo precio por persona:",precioPorPersona);
+    const numero=Number(String(valor||"").replace(/\D/g,""));
+    if(numero>0){
+      precioPorPersona=numero;
+      localStorage.setItem(STORAGE.precio,String(numero));
+      refrescarConfiguracion();toast("Precio actualizado.");
+    }
+    toggleSettings(false);
+  }
+
+  function editarDestino(){
+    if(!validarPassword()) return;
+    const valor=prompt("Nuevo destino:",destinoFijo);
+    if(valor && valor.trim()){
+      destinoFijo=valor.trim();
+      localStorage.setItem(STORAGE.destino,destinoFijo);
+      refrescarConfiguracion();toast("Destino actualizado.");
+    }
+    toggleSettings(false);
+  }
+
+  function editarFechaViaje(){
+    if(!validarPassword()) return;
+    const valor=prompt("Fecha del viaje en formato AAAA-MM-DD:",fechaViaje);
+    if(valor===null){toggleSettings(false);return}
+    if(!valor || /^\d{4}-\d{2}-\d{2}$/.test(valor)){
+      fechaViaje=valor||"";
+      localStorage.setItem(STORAGE.fecha,fechaViaje);
+      refrescarConfiguracion();toast(fechaViaje?"Fecha actualizada.":"Fecha eliminada.");
+    }else{
+      fechaViaje=valor;
+      localStorage.setItem(STORAGE.fecha,fechaViaje);
+      refrescarConfiguracion();toast("Fecha actualizada.");
+    }
+    toggleSettings(false);
+  }
+
+  function cambiarContrasena(){
+    if(!validarPassword()) return;
+    const nueva=prompt("Ingresa la nueva contraseña:");
+    if(nueva && nueva.length>=4){
+      contrasena=nueva;
+      localStorage.setItem(STORAGE.password,nueva);
+      toast("Contraseña actualizada.");
+    }else if(nueva!==null){toast("Usa al menos 4 caracteres.");}
+    toggleSettings(false);
+  }
+
+  function restaurarSistema(){
+    if(!validarPassword()) return;
+    if(confirm("¿Restaurar toda la configuración y borrar las reservas?")){
+      reservas=[];
+      precioPorPersona=10000;
+      destinoFijo="Destino por definir";
+      fechaViaje="";
+      contrasena="12345";
+      Object.values(STORAGE).forEach(k=>localStorage.removeItem(k));
+      localStorage.removeItem("reservas");
+      localStorage.removeItem("precioPorPersona");
+      localStorage.removeItem("destinoFijo");
+      localStorage.removeItem("contrasena");
+      actualizar();
+      toast("Sistema restaurado. Contraseña: 12345");
+    }
+    toggleSettings(false);
+  }
+
+  function toggleSettings(forzar){
+    const menu=$("settingsMenu");
+    const abrir=typeof forzar==="boolean"?forzar:!menu.classList.contains("open");
+    menu.classList.toggle("open",abrir);
+  }
+
+  function descargarLista(){
+    const encabezado=["N°","Nombre","Teléfono","RUT","Personas","Fecha","Estado","Precio","Subtotal"];
+    const filas=[...reservas].sort((a,b)=>a.nombre.localeCompare(b.nombre,"es")).map((r,i)=>[
+      i+1,r.nombre,r.telefono,r.rut,r.numPersonas,r.fecha,r.estado,r.precio,r.precio*r.numPersonas
+    ]);
+    const esc=v=>`"${String(v).replace(/"/g,'""')}"`;
+    const csv="\uFEFF"+[encabezado,...filas].map(f=>f.map(esc).join(";")).join("\n");
+    const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");a.href=url;a.download="reservas-viajapro.csv";a.click();
+    URL.revokeObjectURL(url);
+    toast("Lista CSV descargada.");
+  }
+
+  function descargarPdf(){
+    if(!window.jspdf){toast("No se pudo cargar el generador PDF.");return}
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF({orientation:"landscape"});
+    doc.setFontSize(18);doc.text("Lista de Reservas - ViajaPro",14,16);
+    doc.setFontSize(10);doc.text(`Destino: ${destinoFijo} | Precio: ${formatoCLP(precioPorPersona)}`,14,23);
+    doc.autoTable({
+      startY:28,
+      head:[["#","Nombre","Teléfono","RUT","Personas","Fecha","Estado","Subtotal"]],
+      body:[...reservas].sort((a,b)=>a.nombre.localeCompare(b.nombre,"es")).map((r,i)=>[
+        i+1,r.nombre,r.telefono,r.rut,r.numPersonas,fechaBonita(r.fecha),r.estado,formatoCLP(r.precio*r.numPersonas)
+      ]),
+      styles:{fontSize:8,cellPadding:3},
+      headStyles:{fillColor:[15,118,110]}
+    });
+    doc.save("reservas-viajapro.pdf");
+  }
+
+  function imprimirReservas(){
+    cambiarTab("tabLista");
+    setTimeout(()=>window.print(),250);
+  }
+
+  $("modal").addEventListener("click",e=>{if(e.target===$("modal"))cerrarModal()});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"){cerrarModal();toggleSettings(false)}});
+  document.addEventListener("click",e=>{
+    if(!e.target.closest(".settings-menu")&&!e.target.closest(".fab"))toggleSettings(false);
+  });
+
+  window.app={editarReserva,eliminarReserva,cambiarEstado,verTicket,enviarWhatsApp};
+  Object.assign(window,{cambiarTab,cerrarModal,eliminarTodasReservas,editarPrecio,editarDestino,editarFechaViaje,cambiarContrasena,restaurarSistema,toggleSettings,descargarLista,descargarPdf,imprimirReservas});
+
+  refrescarConfiguracion();
+  actualizar();
+})();
+</script>
+</body>
+</html>
